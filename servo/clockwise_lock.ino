@@ -1,9 +1,10 @@
-// Rotate a continuous servo 180 degrees
+// Rotate a continuous server clockwise 180 degrees to lock the door
 // Most of this code taken from the sample SWEEP code
 
 #include <Servo.h> 
  
-Servo myservo;  // create servo object
+Servo myservo;  // create servo object to control a servo 
+                // a maximum of eight servo objects can be created 
  
 int pos = 0;    // variable to store the servo position 
  
@@ -14,15 +15,8 @@ void setup()
  
  
 void loop() 
-{
-  if (Serial.available())
-  {
-    char door = Serial.read();
-    if      (door == 'u') pos = 0
-    else if (door == 'l') pos = 180
-  }
-
-  myservo.write(pos);
+{ 
+  myservo.write(180);
   delay(850);
   exit(0);
 } 

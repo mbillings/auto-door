@@ -3,7 +3,7 @@
 #
 #          FILE: doorman.sh
 # 
-#         USAGE: ./doorman on boot for best results 
+#         USAGE: set a cron job to ensure ./doorman.sh is running
 # 
 #   DESCRIPTION: Lock/unlock door based on 
 # 
@@ -13,7 +13,8 @@
 #         NOTES: Tested with a Netgear dd-wrt'd router with mini firmware rev.24
 #                0.2 (FUTURE) unlock/lock based on time of day so it's easier to
 #                    leave the house at 6:50 every morning and have the door
-#                    lock at 7:00
+#                    lock at 7:00.
+#                0.3 avrdude is the program of choice.
 #
 #  ORGANIZATION: ---
 #       CREATED: 27 January 2013
@@ -23,8 +24,15 @@
 #===============================================================================
 
 # user-defined variables
+AVRDUDE="/bin/avrdude"
+arduino_type="m328p"
+avrdude_config="/etc/avrdude/avrdude.conv"
+baudrate="115200"
+hex_dir="hex"
 ip="192.168.1.1"
 mac_allow="/usr/local/etc/mac_allow"
+port="/dev/ttyACM0"
+programmer="stk500v1"
 uri="Status_Wireless.asp"
 username="HaruHaraHaruko"
 userpass="TVPuppetPals!"
@@ -36,9 +44,10 @@ macs=( AA:BB:CC:DD:EE:01 AA:BB:CC:DD:EE:02 )
 # loop every 10 seconds
 while :
 do
-  # since we don't care who corresponds to what mac address, unlock whenever a new address is present
+  # since we don't care who corresponds to what mac address (at the moment), unlock whenever a new address is present
   if [ $(curl --user $user:$pass $ip/$uri | egrep ^setWirelessTable | tr \' '\n' | grep ":" | egrep "$(echo ${#macs[@]} | tr ' ' '\|')" | wc -l) -le $(wc -l $mac_allow)]
-  then echo servo_unlock
+  then  "
+        "$AVRDUDE" -C "$avrdude_config" -F -p "$arduino_type" -c "$programmer" -P "$port" -b "$baudrate" -D -Uflash:w:"$hex"/counterclockwise_unlock.cpp.hex
   fi
   
   sleep 10
